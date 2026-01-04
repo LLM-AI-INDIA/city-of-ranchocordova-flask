@@ -289,7 +289,7 @@ def generate_visualization(query: str, agent_type: str, df: pd.DataFrame) -> dic
         elif viz_type in [
             "hourly_pattern",
             "peak_analysis",
-            "cost_analysis",
+            # "cost_analysis",
             "benchmark",
             "appliance_breakdown",
             "renewable_mix",
@@ -308,9 +308,9 @@ def generate_visualization(query: str, agent_type: str, df: pd.DataFrame) -> dic
                     return analyze_hourly_pattern()
                 elif viz_type == "peak_analysis":
                     return detect_peak_hours()
-                elif viz_type == "cost_analysis":
-                    result = calculate_electricity_cost()
-                    return result.get("visualization") if result else None
+                # elif viz_type == "cost_analysis":
+                #     result = calculate_electricity_cost()
+                #     return result.get("visualization") if result else None
                 elif viz_type == "benchmark":
                     avg_consumption = df["EnergyConsumption_kWh"].mean()
                     return compare_with_benchmarks(avg_consumption)
