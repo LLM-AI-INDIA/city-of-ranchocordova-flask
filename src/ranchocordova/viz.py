@@ -259,6 +259,56 @@ def _generate_time_trend(df: pd.DataFrame) -> str:
     return _save_fig_to_base64(fig)
 
 
+def _generate_hourly_usage_pattern(hourly_df: pd.DataFrame) -> str:
+    """Generate average hourly usage pattern (24-hour line chart)"""
+
+    if hourly_df is None or "Hour" not in hourly_df.columns:
+        return None
+
+    # Average consumption by hour of day
+    hourly_avg = (
+        hourly_df.groupby("Hour")["Consumption_kWh"]
+        .mean()
+        .reindex(range(24), fill_value=0)
+    )
+
+    hours = [f"{h:02d}:00" for h in range(24)]
+    consumption = hourly_avg.values
+
+    fig, ax = plt.subplots(figsize=(12, 6), facecolor="white")
+
+    ax.plot(hours, consumption, marker="o", linewidth=2.5, markersize=6)
+
+    ax.set_title(
+        "Average Electricity Usage by Time of Day",
+        fontsize=16,
+        fontweight="bold",
+        pad=20,
+    )
+    ax.set_xlabel("Hour of Day", fontsize=12, fontweight="bold")
+    ax.set_ylabel("Average Energy Consumption (kWh)", fontsize=12, fontweight="bold")
+
+    ax.grid(True, alpha=0.3, linestyle="--")
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha="right")
+
+    # Highlight peak hour
+    peak_hour = hourly_avg.idxmax()
+    peak_value = hourly_avg.max()
+
+    ax.annotate(
+        f"Peak: {peak_value:.1f} kWh",
+        xy=(peak_hour, peak_value),
+        xytext=(0, 15),
+        textcoords="offset points",
+        ha="center",
+        fontsize=10,
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="yellow", alpha=0.8),
+        arrowprops=dict(arrowstyle="->"),
+    )
+
+    return _save_fig_to_base64(fig)
+
+
 def _generate_account_type_trend(df: pd.DataFrame) -> str:
     """Show residential vs commercial trends - LINE CHART"""
 
@@ -428,54 +478,3 @@ def _save_fig_to_base64(fig) -> str:
 
     image_base64 = base64.b64encode(image_bytes).decode("utf-8")
     return f"data:image/png;base64,{image_base64}"
-
-
-# Test
-if __name__ == "__main__":
-    # Test data
-    energy_df = pd.DataFrame(
-        {
-            "CustomerID": ["RC1001"] * 5 + ["RC1002"] * 5,
-            "AccountType": ["Residential"] * 5 + ["Commercial"] * 5,
-            "Month": ["2024-05"] * 10,
-            "EnergyConsumption_kWh": [
-                373,
-                415,
-                358,
-                402,
-                391,
-                1129,
-                1543,
-                1205,
-                1387,
-                1456,
-            ],
-        }
-    )
-
-    cs_df = pd.DataFrame(
-        {
-            "CallID": [f"CL{i:04d}" for i in range(20)],
-            "DateTime": pd.date_range("2024-05-01", periods=20, freq="D").strftime(
-                "%Y-%m-%d %H:%M"
-            ),
-            "Reason": ["Billing question"] * 5
-            + ["Outage report"] * 4
-            + ["Service stop request"] * 3
-            + ["Payment arrangement"] * 4
-            + ["New service"] * 4,
-        }
-    )
-
-    print("Testing hardcoded visualizations...")
-
-    tests = [
-        "Show me energy forecast for next 2 weeks",
-        "Show energy consumption trend",
-        "Show call reasons breakdown",
-        "Show call volume trend",
-    ]
-
-    for query in tests:
-        result = generate_simple_visualization(query, energy_df, cs_df)
-        print(f"✅ {query}: {len(result) if result else 0} chars")

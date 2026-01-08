@@ -1,6 +1,6 @@
 
 ## AI-Data-2025-R1.csv (Energy Agent)
-What time of day do customers typically use the most electricity? Show me the hourly usage patterns.
+What time of day do customers typically use the most electricity?
 Which customer accounts have the highest total energy consumption over the year? Give me the top 5.
 ---
 
@@ -34,9 +34,9 @@ According to the California appliance study, what percentage of homes have elect
 Plotting commands:
 
 ## Energy Agent
-1. Show me energy forecast for next 2 weeks
-2. Show energy trend over time
+Show me energy forecast for next 2 weeks
+Show energy trend over time with a graph
 
 ## Customer Service Agent
-3. Show call reasons breakdown
-4. Show call volume trend
+Show call reasons breakdown
+Show call volume trend

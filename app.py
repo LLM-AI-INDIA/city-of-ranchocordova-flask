@@ -305,30 +305,11 @@ def ftb():
     return render_template("ftb.html")
 
 
-@app.route("/oops")
-@login_required
-def oops():
-    return render_template("oops.html")
-
-
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
-
-
-@app.route("/insights")
-@login_required
-def insights():
-    # Get breadcrumb parameters
-    category = request.args.get("cat", "public_services")
-    dept = request.args.get("dept", "")
-    dept_display = request.args.get("dept_display", "")
-
-    return render_template(
-        "insights.html", category=category, dept=dept, dept_display=dept_display
-    )
 
 
 ### This routes to the modules page ###

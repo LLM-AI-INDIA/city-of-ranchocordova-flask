@@ -571,6 +571,26 @@ def chat(user_message: str, conversation_history: list = None) -> dict:
     return {"response": response, "agent_type": agent_type, "context_used": True}
 
 
+def _short_viz_response(prompt: str) -> str:
+    prompt = prompt.lower()
+
+    if "forecast" in prompt:
+        return "Here’s a 14-day energy consumption forecast based on recent trends."
+
+    if "trend" in prompt:
+        return "This chart shows how energy usage changes over time."
+
+    if "reason" in prompt:
+        return (
+            "This breakdown shows the most common reasons for customer service calls."
+        )
+
+    if "volume" in prompt:
+        return "This graph shows customer service call volume over time."
+
+    return "Here’s the visualization you requested."
+
+
 # ============================================================================
 # Backward Compatibility for Flask App
 # ============================================================================
@@ -586,8 +606,40 @@ def generate_answer(prompt: str, agent_type: str = None) -> dict:
     print(f"🤖 Agent Type: {agent_type}")
     print(f"📝 Query: {prompt}")
 
+    # ------------------------------------------------------------------
+    # VISUALIZATION-ONLY SHORT CIRCUIT (NO LLM, NO CODE IN OUTPUT)
+    # ------------------------------------------------------------------
+
+    viz_keywords = [
+        "chart",
+        "graph",
+        "plot",
+        "show",
+        "visualize",
+        "forecast",
+        "trend",
+        "reason",
+        "volume",
+    ]
+
+    if any(kw in prompt.lower() for kw in viz_keywords):
+        from .viz import generate_simple_visualization
+
+        visualization = generate_simple_visualization(prompt, _energy_df, _cs_df)
+
+        if visualization:
+            return {
+                "answer": _short_viz_response(prompt),
+                "visualization": visualization,
+            }
+
+    # ------------------------------------------------------------------
+    # NORMAL TEXT FLOW (LLM USED ONLY IF NOT A PLOT)
+    # ------------------------------------------------------------------
+
     response_text = generate_response(prompt, use_rag=True, agent_type=agent_type)
-    print(f"✅ Response generated: {len(response_text)} chars")
+
+    return {"answer": response_text, "visualization": None}
 
     # Simple visualization
     visualization = None
